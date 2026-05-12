@@ -19,8 +19,13 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json,yaml,yml}\""
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.6.0",
     "prettier": "^3.8.3",
-    "turbo": "^2.9.12"
+    "turbo": "^2.9.12",
+    "typescript-eslint": "^8.59.3"
   },
   "workspaces": [
     "apps/*",
