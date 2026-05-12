@@ -26,6 +26,4 @@ export type ISODateString = Brand<string, "ISODateString">;
  *   const result: Result<User, "NotFound" | "Forbidden"> = ...
  *   if (result.ok) { use(result.value) } else { handle(result.error) }
  */
-export type Result<T, E = string> =
-  | { ok: true; value: T }
-  | { ok: false; error: E };
+export type Result<T, E = string> = { ok: true; value: T } | { ok: false; error: E };

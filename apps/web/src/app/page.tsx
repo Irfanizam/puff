@@ -22,9 +22,7 @@ export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
       <h1 className="text-3xl font-semibold">Puff</h1>
-      <p className="text-sm text-gray-500">
-        AI Engineering Ecosystem — Phase 1 foundation
-      </p>
+      <p className="text-sm text-gray-500">AI Engineering Ecosystem — Phase 1 foundation</p>
       <Button variant="primary" className="rounded-md border px-4 py-2">
         Cross-package import works
       </Button>
