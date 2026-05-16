@@ -1,0 +1,3 @@
+# Validate commit message against Conventional Commits format.
+# Blocks the commit if format is wrong.
+pnpm exec commitlint --edit "$1"

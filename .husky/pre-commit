@@ -1,0 +1,10 @@
+# Run lint-staged on staged files.
+# - Runs Prettier and ESLint --fix on changed JS/TS files
+# - Re-stages corrected files automatically
+# - Blocks commit if errors remain after auto-fix
+pnpm exec lint-staged
+
+# Run typecheck across affected workspaces.
+# Slower than lint-staged but catches type errors that lint can't.
+# Turbo caches keep this fast (<1s when nothing changed).
+pnpm typecheck
