@@ -18,3 +18,5 @@ Next.js 15 · TypeScript · pnpm · Turborepo · PostgreSQL · pgvector · Redis
 ---
 
 Currently under active development.
+
+<!-- Test: should be blocked by branch protection when repo is public -->
