@@ -53,3 +53,7 @@ Phase 1, Step 3: Monorepo skeleton
 - Working in WSL2 Ubuntu via VSCode Remote
 - Repo lives at ~/code/puff (Linux filesystem, not Windows mount)
 - Using SSH for GitHub
+
+## Last updated
+
+Phase 1, Step 5 — quality gates installed (Prettier, ESLint, Husky, CI, branch protection)
