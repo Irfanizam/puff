@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
 
   // Transpile internal workspace packages from their TypeScript source.
   // Without this, Next.js would expect a pre-built dist/ folder in each package.
-  transpilePackages: ["@puff/ui", "@puff/types"],
+  transpilePackages: ["@puff/ui", "@puff/types", "@puff/logger"],
 };
 
 export default nextConfig;
