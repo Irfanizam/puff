@@ -3,40 +3,28 @@
  *
  * Layering order (last wins on conflicts):
  *   1. Next.js web vitals + TypeScript rules (eslint-config-next defaults)
- *   2. Codebase conventions from @puff/config (underscore-prefix for
- *      intentionally-unused vars, consistent type imports, etc.)
+ *   2. Codebase conventions from @puff/config (unused-vars, type imports,
+ *      no console — applies uniformly across all Puff code)
  *   3. Prettier compatibility (disable style rules so Prettier handles them)
  *
  * We don't apply the full @puff/config base because Next.js already provides
- * a rich rule set. We only override the specific conventions we want to
- * apply uniformly across the codebase (the underscore-prefix rule, for now).
+ * a rich rule set. We apply the codebase rules directly so they reach this
+ * app the same way they reach the internal packages.
  */
 
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettierConfig from "eslint-config-prettier";
+import codebaseRules from "@puff/config/eslint.codebase-rules.mjs";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
 
-  // Codebase conventions that apply to all Puff packages, including this app.
-  // Kept inline (not imported from @puff/config) because we only want a
-  // narrow subset of our shared rules here.
-  {
-    rules: {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          caughtErrorsIgnorePattern: "^_",
-        },
-      ],
-    },
-  },
+  // Puff codebase conventions — single source of truth in @puff/config.
+  codebaseRules,
 
   prettierConfig,
 ]);

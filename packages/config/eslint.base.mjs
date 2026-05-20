@@ -1,16 +1,16 @@
 /**
  * @puff/config/eslint.base.mjs
  *
- * Shared ESLint flat config for Puff workspaces.
+ * Shared ESLint flat config for non-framework workspaces (packages/*).
  *
- * What this provides:
- * - ESLint's recommended rules for JavaScript
- * - TypeScript-aware linting via typescript-eslint
- * - Prettier compatibility (disables conflicting style rules)
+ * Composition:
+ *   1. ESLint recommended (vanilla JS)
+ *   2. TypeScript-ESLint recommended (TS-aware)
+ *   3. Codebase rules (Puff conventions — single source of truth)
+ *   4. Prettier compatibility (style rules off)
  *
- * What this DOESN'T provide:
- * - React/Next.js rules (added per-app in apps/web/eslint.config.mjs)
- * - Project-specific overrides (added per-package)
+ * Order matters. Codebase rules go after the recommended sets so they
+ * override defaults. Prettier goes last so it has the final say on style.
  *
  * Usage:
  *   import baseConfig from "@puff/config/eslint.base.mjs";
@@ -20,41 +20,11 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
+import codebaseRules from "./eslint.codebase-rules.mjs";
 
 export default [
-  // ESLint's recommended rules for JavaScript
   js.configs.recommended,
-
-  // TypeScript-recommended rules (without type-checking — that's a heavier opt-in)
   ...tseslint.configs.recommended,
-
-  // Custom rule overrides for our codebase
-  {
-    rules: {
-      // Allow unused variables if prefixed with underscore (intent: "intentionally unused")
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          caughtErrorsIgnorePattern: "^_",
-        },
-      ],
-
-      // Require consistent use of type imports vs value imports
-      // import type { Foo } from "..." vs import { Foo } from "..."
-      // This helps bundlers tree-shake correctly.
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        { prefer: "type-imports", fixStyle: "inline-type-imports" },
-      ],
-
-      // Allow `any` in tests and example files via override below.
-      // In production code we want explicit types.
-      "@typescript-eslint/no-explicit-any": "warn",
-    },
-  },
-
-  // Prettier compatibility — MUST be last to override conflicting style rules.
+  codebaseRules,
   prettierConfig,
 ];
