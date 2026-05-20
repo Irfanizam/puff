@@ -5,26 +5,52 @@
  *
  * Key decisions:
  * - turbopack.root: explicitly declares the monorepo root.
- *   Without this, Next.js infers the root by searching for lockfiles,
- *   which is fragile in monorepos. Explicit declaration = predictable builds.
- * - transpilePackages: tells Next.js to compile our internal @puff/* packages
- *   from their TypeScript source (rather than expecting pre-built JS).
- *   This is what enables our "no build step for internal packages" approach.
+ * - transpilePackages: tells Next.js to compile our internal @puff/*
+ *   packages from their TypeScript source.
+ * - withSentryConfig: wraps the config to auto-upload source maps
+ *   and tunnel Sentry traffic. Tunneling avoids ad-blockers that
+ *   block sentry.io requests (a real production problem).
  */
 
 import type { NextConfig } from "next";
 import path from "node:path";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  // Tell Next.js this is part of a monorepo and where the root is.
-  // Resolves to ~/code/puff (two levels up from apps/web).
   turbopack: {
     root: path.join(__dirname, "../.."),
   },
-
-  // Transpile internal workspace packages from their TypeScript source.
-  // Without this, Next.js would expect a pre-built dist/ folder in each package.
   transpilePackages: ["@puff/ui", "@puff/types", "@puff/logger"],
 };
 
-export default nextConfig;
+/**
+ * Sentry build-time configuration.
+ *
+ * Source maps:
+ *   Uploaded to Sentry for unminified stack traces in production.
+ *   Hidden from public bundles (not served to browsers).
+ *
+ * Tunnel route:
+ *   Sentry events flow through /monitoring instead of sentry.io directly.
+ *   Bypasses ad-blockers and content filters that would otherwise drop events.
+ */
+export default withSentryConfig(nextConfig, {
+  // Sentry organization and project (from your Sentry account).
+  // Read from env so different environments can point to different projects.
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+
+  // Silent unless build fails. Reduces noise in normal builds.
+  silent: !process.env.CI,
+
+  // Source map handling.
+  widenClientFileUpload: true, // Upload source maps for all client routes.
+
+  // Tunnel events through our own domain to avoid ad-blockers.
+  tunnelRoute: "/monitoring",
+
+  // Suppress source map upload errors when SENTRY_AUTH_TOKEN is missing.
+  // Lets developers run builds without a Sentry account.
+  disableLogger: true,
+  automaticVercelMonitors: true,
+});
