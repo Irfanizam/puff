@@ -5,7 +5,7 @@
 
 ## Current phase
 
-Phase 1 — Foundation. Steps 1–6 complete. Step 7 (deploy + ADRs) next.
+**Phase 1 complete.** Phase 2 (Content & UI system) starts next.
 
 ## What's built
 
@@ -18,7 +18,7 @@ Phase 1 — Foundation. Steps 1–6 complete. Step 7 (deploy + ADRs) next.
 - `@puff/logger`: structured logger built on Pino, with redaction
 - `apps/web`: Next.js 16 App Router app
 
-### Quality gates (3 layers)
+### Quality gates (three layers)
 
 - Editor: format-on-save with Prettier, ESLint with red squiggles
 - Pre-commit: lint-staged + typecheck + commitlint (Conventional Commits)
@@ -27,20 +27,23 @@ Phase 1 — Foundation. Steps 1–6 complete. Step 7 (deploy + ADRs) next.
 
 ### Observability foundation
 
-- `@puff/logger` shared across all workspaces: structured JSON in prod, pretty in dev
+- `@puff/logger` shared across all workspaces
 - Field-level redaction for passwords, tokens, auth headers
 - Request ID middleware: ULID-based correlation, propagated via headers
-- Sentry integration: server + client + edge runtimes, source map upload,
-  tunnel route to bypass ad-blockers, release tagging
-- ESLint rule enforces structured logger (no console.log; console.warn/error allowed)
+- Sentry integration: server + client + edge runtimes
+- ESLint rule enforces structured logger (no console.log; warn/error allowed)
 
-### Architectural conventions encoded
+### Deployment
 
-- Codebase ESLint rules live in `@puff/config/eslint.codebase-rules.mjs`
-  as single source of truth
-- Workspace dependencies use the workspace protocol (`workspace:*`)
-- Root eslint.config.mjs supports lint-staged invocation patterns
-- Conventional Commits enforced by commitlint
+- Live at https://puff-puce.vercel.app
+- Automatic deploys from main branch via Vercel
+- Preview URLs on every PR (Vercel bot comments with link)
+
+### Documentation
+
+- 5 ADRs written for the most defensible Phase 1 decisions
+- README.md rewritten for public consumption
+- `docs/adr/README.md` and `_template.md` document ADR conventions
 
 ## Stack (current)
 
@@ -56,14 +59,14 @@ Phase 1 — Foundation. Steps 1–6 complete. Step 7 (deploy + ADRs) next.
 - Pino 9, pino-pretty 11
 - @sentry/nextjs (server, client, edge runtimes)
 - ulid for request IDs
-- GitHub Actions for CI
+- GitHub Actions for CI, Vercel for deployment
 
 ## Stack (planned)
 
 - shadcn/ui (Phase 2)
 - MDX content collections (Phase 2)
-- Vercel deployment (Phase 1, Step 7)
 - Vercel AI SDK, OpenAI, Anthropic (Phase 3)
+- Python + FastAPI service (Phase 3 for GenAI credibility)
 - PostgreSQL + Prisma + pgvector (Phase 4)
 - LangChain primitives + LangGraph + MCP (Phase 5)
 
@@ -81,42 +84,33 @@ Phase 1 — Foundation. Steps 1–6 complete. Step 7 (deploy + ADRs) next.
 9. Every HTTP request gets a unique ULID. The ID flows through request
    headers, response headers, and every log line for that request.
 
-## Toolchain decisions encoded
-
-- pnpm 10 (not 11) due to subprocess workspace-root resolution bug in pnpm 11.0.9
-- TypeScript 6 (latest stable as of install)
-- Internal packages export TypeScript source directly (no build step);
-  consumers transpile via Next.js's `transpilePackages`
-- Workspace protocol (`workspace:*`) for all internal package references
-- `onlyBuiltDependencies` allowlist for supply-chain defense (currently:
-  sharp, unrs-resolver)
-- Conventional Commits with relaxed subject-case rule
-- Pino selected over Winston for edge runtime compatibility and speed
-- Sentry optional in dev (no DSN = inactive); required in production
-- Codebase ESLint rules extracted into a separate module so apps and
-  packages can compose them differently without rule drift
-
 ## ADRs written
 
-None yet. Backlog from journey so far:
+| ADR | Title                                              |
+| --- | -------------------------------------------------- |
+| 001 | Monorepo with pnpm workspaces + Turborepo          |
+| 002 | Pin pnpm to 10.x via Corepack                      |
+| 003 | Three-layer quality gates (editor, pre-commit, CI) |
+| 004 | Shared structured logger built on Pino             |
+| 005 | ULID-based request IDs for full-stack correlation  |
 
-- ADR-001: Monorepo with pnpm workspaces + Turborepo
-- ADR-002: Pin pnpm to 10.x (pnpm 11 subprocess bug)
-- ADR-003: Folder structure (apps/, packages/, docs/)
-- ADR-004: TypeScript shared config pattern
-- ADR-005: Internal packages export source (no build step)
-- ADR-006: Three-layer quality gates (editor, pre-commit, CI)
-- ADR-007: Branch protection with bypass prevention
-- ADR-008: Pino-based shared logger with redaction
-- ADR-009: ULID request IDs with full-stack correlation
-- ADR-010: Sentry across server/client/edge runtimes
-- ADR-011: Codebase ESLint rules as a separate composable module
+Additional ADR candidates (write when we encounter new decisions):
 
-To be written at the end of Phase 1 (Step 7), before deployment.
+- Folder structure (apps/, packages/, docs/)
+- Shared TypeScript configuration pattern
+- Internal packages export source (no build step)
+- Branch protection with bypass prevention
+- Sentry across three Next.js runtimes
+- Codebase ESLint rules as a separate composable module
 
 ## Currently working on
 
-Phase 1, Step 7 — deploy to Vercel and write the ADRs.
+**Phase 2 — Content & UI system.** Next steps to plan:
+
+- shadcn/ui integration
+- MDX blog with content collections
+- Portfolio home page redesign
+- OG image generation
 
 ## Workflow notes
 
@@ -127,19 +121,26 @@ Phase 1, Step 7 — deploy to Vercel and write the ADRs.
 - `git config --global pull.ff only` (fail-loud on divergence)
 - Pre-commit hooks run: lint-staged (Prettier + ESLint) + typecheck +
   commitlint on the message
+- Vercel deploys automatically from main; preview deploys on every PR
 
 ## Merged PRs
 
-| #   | Title                                                      | Phase / Step            |
-| --- | ---------------------------------------------------------- | ----------------------- |
-| 1   | Update CLAUDE_CONTEXT.md with step 5 completion            | Phase 1 / Step 5 (test) |
-| 2   | Refresh CLAUDE_CONTEXT.md after Step 5 completion          | Phase 1 / Step 5        |
-| 3   | Scaffold docs folders with ADR template and conventions    | Phase 1 / pre-Step 6    |
-| 4   | Add @puff/logger shared logging package                    | Phase 1 / Step 6.1      |
-| 5   | Add request ID middleware with ULID-based correlation      | Phase 1 / Step 6.2      |
-| 6   | Integrate Sentry for error tracking and performance traces | Phase 1 / Step 6.3      |
-| 7   | Enforce no console.log via shared codebase rules           | Phase 1 / Step 6.4      |
+Phase 1 PR history:
+
+| #   | Title                                                            |
+| --- | ---------------------------------------------------------------- |
+| 1-3 | Initial documentation setup                                      |
+| 4   | Add @puff/logger shared logging package                          |
+| 5   | Add request ID middleware with ULID-based correlation            |
+| 6   | Integrate Sentry for error tracking and performance traces       |
+| 7   | Enforce no console.log via shared codebase rules                 |
+| 8   | Refresh CLAUDE_CONTEXT.md after Step 6 completion                |
+| 9   | Set proper page metadata for portfolio                           |
+| 10  | Write ADRs 001-005 for Phase 1 foundational decisions            |
+| 11  | Close Phase 1: README, final CLAUDE_CONTEXT.md refresh (this PR) |
 
 ## Last updated
 
-End of Phase 1, Step 6 — observability foundation complete.
+**End of Phase 1** — foundation complete. Public deployment, five documented
+ADRs, three-layer quality gates, and observability infrastructure all in place.
+Ready to begin Phase 2.
